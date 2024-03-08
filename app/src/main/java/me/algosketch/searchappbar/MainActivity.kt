@@ -66,6 +66,16 @@ fun SampleScreen() {
 
                 return Offset.Zero
             }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                appbarOffsetHeightPx -= available.y
+
+                return Offset.Zero
+            }
         }
     }
 
