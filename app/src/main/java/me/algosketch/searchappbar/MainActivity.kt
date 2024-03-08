@@ -56,14 +56,14 @@ class MainActivity : ComponentActivity() {
 fun SampleScreen() {
     val scrollableHeight = 80.dp
     val appBarHeight = 160.dp
-    val appbarHeightPx = with(LocalDensity.current) { appBarHeight.roundToPx().toFloat() }
+    val scrollableHeightPx = with(LocalDensity.current) { scrollableHeight.roundToPx().toFloat() }
     var appbarOffsetHeightPx by remember { mutableStateOf(0f) }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val newOffset = appbarOffsetHeightPx + available.y
-                appbarOffsetHeightPx = newOffset.coerceIn(-appbarHeightPx, 0f)
+                appbarOffsetHeightPx = newOffset.coerceIn(-scrollableHeightPx, 0f)
 
                 return Offset.Zero
             }
