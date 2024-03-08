@@ -13,14 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,9 +33,11 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import me.algosketch.searchappbar.ui.SearchViewModel
 import me.algosketch.searchappbar.ui.theme.SearchAppBarTheme
 import kotlin.math.roundToInt
 
@@ -45,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SampleScreen()
+                    SampleScreen(viewModel = SearchViewModel())
                 }
             }
         }
@@ -53,11 +58,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SampleScreen() {
+fun SampleScreen(viewModel: SearchViewModel) {
+    val keyword by viewModel.keyword.collectAsState()
+    val titles by viewModel.titles.collectAsState()
+
     val scrollableHeight = 80.dp
     val appBarHeight = 160.dp
     val scrollableHeightPx = with(LocalDensity.current) { scrollableHeight.roundToPx().toFloat() }
-    var appbarOffsetHeightPx by remember { mutableStateOf(0f) }
+    var appbarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -87,11 +95,11 @@ fun SampleScreen() {
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(top = appBarHeight)
+                contentPadding = PaddingValues(top = appBarHeight),
             ) {
-                items(100) {
+                items(titles.size, key = { it }) {
                     Text(
-                        text = "Hello Compose! $it",
+                        text = titles[it],
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
@@ -109,6 +117,8 @@ fun SampleScreen() {
                         )
                     },
                 scrollableHeight = scrollableHeight,
+                keyword = keyword,
+                onKeywordChanged = viewModel::updateKeyword,
             )
         }
     }
@@ -117,6 +127,8 @@ fun SampleScreen() {
 @Composable
 fun SearchAppBar(
     scrollableHeight: Dp,
+    keyword: String,
+    onKeywordChanged: (keyword: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -132,8 +144,9 @@ fun SearchAppBar(
         )
         TextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
-            onValueChange = {},
+            value = keyword,
+            onValueChange = onKeywordChanged,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
     }
 }
