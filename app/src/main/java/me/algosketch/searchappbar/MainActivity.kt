@@ -62,8 +62,7 @@ fun SampleScreen() {
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val newOffset = appbarOffsetHeightPx + available.y
-                appbarOffsetHeightPx = newOffset.coerceIn(-scrollableHeightPx, 0f)
+                appbarOffsetHeightPx += available.y
 
                 return Offset.Zero
             }
@@ -91,7 +90,14 @@ fun SampleScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(appBarHeight)
-                    .offset { IntOffset(x = 0, y = appbarOffsetHeightPx.roundToInt()) },
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = appbarOffsetHeightPx
+                                .coerceIn(-scrollableHeightPx, 0f)
+                                .roundToInt()
+                        )
+                    },
                 scrollableHeight = scrollableHeight,
             )
         }
