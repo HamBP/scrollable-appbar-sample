@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -67,6 +68,15 @@ fun SampleScreen(viewModel: SearchViewModel) {
     val scrollableHeightPx = with(LocalDensity.current) { scrollableHeight.roundToPx().toFloat() }
     var appbarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
 
+    val lazyColumnState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        viewModel.refresh.collect {
+            lazyColumnState.animateScrollToItem(0, 0)
+            appbarOffsetHeightPx = 0f
+        }
+    }
+
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -95,6 +105,7 @@ fun SampleScreen(viewModel: SearchViewModel) {
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
+                state = lazyColumnState,
                 contentPadding = PaddingValues(top = appBarHeight),
             ) {
                 items(titles.size, key = { it }) {
